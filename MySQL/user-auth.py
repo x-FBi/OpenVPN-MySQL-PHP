@@ -15,21 +15,21 @@ connection = database.connect(
 )
 cursor = connection.cursor()
 
-
 hash_func = getattr(hashlib, HASH_ALGORITHM)
 salty = hash_func(HASH_SALTY.encode("utf-8")).hexdigest()
 
-ovpnuser = (os.environ['username'])
+ovpnuser = os.environ.get('username', 'test') # ovpn uses 'username'  and 'test' is default if not found
 ovpnuser = "SELECT * FROM users WHERE usernames = '" + ovpnuser + "';"
-print(ovpnuser)
 cursor.execute(ovpnuser)
 result = cursor.fetchone()
 
-if result is None:
+if result is None: # User doesn't exist
     sys.exit(1)
-print(result)
+
 id, usernames, passwords = result
-passw = (os.environ['password'] + salty) #Salt this mofo
+passw = (os.environ.get('password') + salty) #Salt this mofo
+
 if hash_func(passw.encode("utf-8")).hexdigest() != passwords:
     sys.exit(1)
+
 sys.exit(0)
